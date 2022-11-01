@@ -1,4 +1,5 @@
-welcome_input = """
+"""Custom text module"""
+WELCOME_INPUT = """
 
 Escoja una opción:
  
@@ -7,7 +8,7 @@ Escoja una opción:
 
 -> """
 
-method_input = """
+METHOD_INPUT = """
 
 Escoja el metodo para el criterio de decision:
 

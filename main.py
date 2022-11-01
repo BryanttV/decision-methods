@@ -1,10 +1,11 @@
 """Operations Research Final Project"""
 from copy import deepcopy
 from typing import Tuple
+
 import numpy as np
 from tabulate import tabulate
 
-from text import welcome_input
+from text import WELCOME_INPUT
 
 
 def create_matrix(rows: int, cols: int) -> list[list[int]]:
@@ -72,7 +73,7 @@ def laplace(matrix: list[list[int]]) -> list[int]:
         expc_value = 0
         for number in row:
             expc_value += number * prob
-        expc_values.append(expc_value)
+        expc_values.append(round(expc_value, 2))
 
     return expc_values
 
@@ -87,13 +88,8 @@ def hurwicz(matrix: list[list[int]], opt_coef: float) -> list[int]:
     Returns:
         * expc_values list[int]: Final results
     """
-    expc_values = []
     pess_coef = 1 - opt_coef
-
-    for row in matrix:
-        expc_values.append(max(row) * opt_coef + min(row) * pess_coef)
-
-    return expc_values
+    return [(max(row) * opt_coef + min(row) * pess_coef) for row in matrix]
 
 
 def savage(matrix: list[list[int]]) -> list[int]:
@@ -107,12 +103,12 @@ def savage(matrix: list[list[int]]) -> list[int]:
     """
     transp_matrix = np.transpose(np.array(matrix))
 
-    for col in range(len(transp_matrix)):
-        maxim = max(transp_matrix[col])
-        for number in range(len(transp_matrix[0])):
-            transp_matrix[col][number] = maxim - transp_matrix[col][number]
+    for idx, col in enumerate(transp_matrix):
+        maxim = max(col)
+        for jdx, number in enumerate(col):
+            transp_matrix[idx][jdx] = maxim - number
 
-    matrix = list(np.transpose(transp_matrix))
+    matrix = np.transpose(transp_matrix).tolist()
 
     return optimistic(matrix)
 
@@ -126,11 +122,7 @@ def optimistic(matrix: list[list[int]]) -> list[int]:
     Returns:
         * expc_values (list[int]): Final results
     """
-    expc_values = []
-    for row in matrix:
-        expc_values.append(max(row))
-
-    return expc_values
+    return [max(row) for row in matrix]
 
 
 def pessimistic(matrix: list[list[int]]) -> list[int]:
@@ -142,11 +134,7 @@ def pessimistic(matrix: list[list[int]]) -> list[int]:
     Returns:
         * expc_values (list[int]): Final results
     """
-    expc_values = []
-    for row in matrix:
-        expc_values.append(min(row))
-
-    return expc_values
+    return [min(row) for row in matrix]
 
 
 def main():
@@ -154,10 +142,9 @@ def main():
     rows = int(input("Ingrese la cantidad de filas: "))
     cols = int(input("Ingrese la cantidad de columnas: "))
 
-    option = int(input(welcome_input))
+    option = int(input(WELCOME_INPUT))
 
     match option:
-
         case 1:
             matrix = create_matrix(rows, cols)
         case 2:
