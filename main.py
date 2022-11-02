@@ -17,21 +17,6 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
     Returns:
         * matrix (list[list[int]]): The created matrix
     """
-    # matrix = []
-    # for i in range(rows):
-    #     row = []
-    #     for j in range(cols):
-    #         while True:
-    #             try:
-    #                 number = int(
-    #                     input(f"Digite el numero para la posicion [{i+1}, {j+1}]: ")
-    #                 )
-    #                 break
-    #             except ValueError:
-    #                 print("¡Digite solo numeros enteros o flotantes!")
-    #         row.append(number)
-    #     matrix.append(row)
-    
     matrix = np.empty([rows, cols])
     
     for i in range(rows):
@@ -161,8 +146,10 @@ def validate_integer_input(name: str, message: str) -> int:
     """
     while True:
         try:
-            variable = int(input(message))
-            return variable
+            if (variable := int(input(message))) > 0: 
+                return variable
+            else:
+                print(f"¡La variable {name} debe ser mayor que cero!")
         except ValueError:
             print(f"¡La variable {name} debe ser un numero entero!")
 
@@ -184,9 +171,14 @@ def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
                 matrix = create_matrix(rows, cols)
                 break
             case 2:
-                low = int(input("Ingrese el limite inferior: "))
-                high = int(input("Ingrese el limite superior: "))
-                matrix = np.random.randint(low, high, size=(rows, cols)).tolist()
+                while True:
+                    try:
+                        low = input("Ingrese el limite inferior: ")
+                        high = input("Ingrese el limite superior: ")
+                        matrix = np.random.randint(low, high, size=(rows, cols)).tolist()
+                        break
+                    except ValueError:
+                        print("¡Los limites son valores enteros!")
                 break
             case _:
                 option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
@@ -214,32 +206,30 @@ def print_results_matrix(
 
 def main():
     """Main function"""
-    # rows = validate_integer_input("filas", "Digite la cantidad de filas: ")
-    # cols = validate_integer_input("columnas", "Digite la cantidad de columnas: ")
+    rows = validate_integer_input("filas", "Digite la cantidad de filas: ")
+    cols = validate_integer_input("columnas", "Digite la cantidad de columnas: ")
 
-    # while True:
-    #     try:
-    #         coef = float(input("Digite el coeficiente de optimismo: "))
-    #         if not 0 <= coef <= 1:
-    #             print("¡El numero debe estar entre 0 y 1!")
-    #         else:
-    #             break
-    #     except ValueError:
-    #         print("¡El valor debe ser un número!")
+    while True:
+        try:
+            coef = float(input("Digite el coeficiente de optimismo: "))
+            if not 0 <= coef <= 1:
+                print("¡El numero debe estar entre 0 y 1!")
+            else:
+                break
+        except ValueError:
+            print("¡El valor debe ser un número!")
 
-    # option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
-    # matrix = validate_option(option, rows, cols)
-    # print(matrix)
-    # print_matrix = generate_print_matrix(matrix, cols)
-    # print(tabulate(print_matrix, tablefmt="fancy_grid"))
+    option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
+    matrix = validate_option(option, rows, cols)
+    print(matrix)
+    print_matrix = generate_print_matrix(matrix, cols)
+    print(tabulate(print_matrix, tablefmt="fancy_grid"))
 
-    # print_results_matrix(print_matrix, laplace(matrix))
-    # print_results_matrix(print_matrix, pessimistic(matrix))
-    # print_results_matrix(print_matrix, optimistic(matrix))
-    # print_results_matrix(print_matrix, hurwicz(matrix, coef))
-    # print_results_matrix(print_matrix, savage(matrix))
-    mat = create_matrix(3,2)
-    print(mat)
+    print_results_matrix(print_matrix, laplace(matrix))
+    print_results_matrix(print_matrix, pessimistic(matrix))
+    print_results_matrix(print_matrix, optimistic(matrix))
+    print_results_matrix(print_matrix, hurwicz(matrix, coef))
+    print_results_matrix(print_matrix, savage(matrix))
 
 if __name__ == "__main__":
     main()
