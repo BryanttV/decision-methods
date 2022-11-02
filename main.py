@@ -1,6 +1,5 @@
 """Operations Research Final Project"""
 from copy import deepcopy
-from typing import Tuple
 
 import numpy as np
 from tabulate import tabulate
@@ -19,26 +18,26 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
         * matrix (list[list[int]]): The created matrix
     """
     matrix = []
-    for row in range(rows):
-        aux = []
-        for col in range(cols):
+    for i in range(rows):
+        row = []
+        for j in range(cols):
             while True:
                 try:
                     number = int(
-                        input(f"Digite el numero para la posicion [{row+1}, {col+1}]: ")
+                        input(f"Digite el numero para la posicion [{i+1}, {j+1}]: ")
                     )
                     break
                 except ValueError:
-                    print("¡Digite solo numeros enteros!")
-            aux.append(number)
-        matrix.append(aux)
+                    print("¡Digite solo numeros enteros o flotantes!")
+            row.append(number)
+        matrix.append(row)
 
     return matrix
 
 
 def generate_print_matrix(
     matrix: list[list[int]], cols: int
-) -> Tuple[list[str], list[list[int | str]]]:
+) -> list[list[int | str] | list[str]]:
     """Generates a print matrix with headers.
 
     Args:
@@ -49,15 +48,19 @@ def generate_print_matrix(
         * Tuple[list[str], list[list[int | str]]]: Print matrix
     """
     headers = [f"S{i}" for i in range(1, cols + 1)]
-    print_matrix: list[list[int | str]] = deepcopy(matrix)  # type: ignore
+    headers.insert(0, "")
+
+    print_matrix: list[list[int | str] | list[str]] = deepcopy(matrix)  # type: ignore
 
     for idx, row in enumerate(print_matrix, 1):
         row.insert(0, f"A{idx}")
 
-    return headers, print_matrix
+    print_matrix.insert(0, headers)
+
+    return print_matrix
 
 
-def laplace(matrix: list[list[int]]) -> list[int]:
+def laplace(matrix: list[list[int]]) -> list[float]:
     """Laplace method.
 
     Args:
@@ -70,7 +73,7 @@ def laplace(matrix: list[list[int]]) -> list[int]:
 
     expc_values = []
     for row in matrix:
-        expc_value = 0
+        expc_value = 0.0
         for number in row:
             expc_value += number * prob
         expc_values.append(round(expc_value, 2))
@@ -78,7 +81,7 @@ def laplace(matrix: list[list[int]]) -> list[int]:
     return expc_values
 
 
-def hurwicz(matrix: list[list[int]], opt_coef: float) -> list[int]:
+def hurwicz(matrix: list[list[int]], opt_coef: float) -> list[float]:
     """Hurwicz method.
 
     Args:
@@ -89,7 +92,7 @@ def hurwicz(matrix: list[list[int]], opt_coef: float) -> list[int]:
         * expc_values list[int]: Final results
     """
     pess_coef = 1 - opt_coef
-    return [(max(row) * opt_coef + min(row) * pess_coef) for row in matrix]
+    return [round((max(row) * opt_coef + min(row) * pess_coef), 2) for row in matrix]
 
 
 def savage(matrix: list[list[int]]) -> list[int]:
@@ -137,30 +140,72 @@ def pessimistic(matrix: list[list[int]]) -> list[int]:
     return [min(row) for row in matrix]
 
 
+def validate_integer_input(name: str, message: str) -> int:
+    """Validates the value of a integer variable.
+
+    Args:
+        * name (str): Name of variable to validate
+
+    Returns:
+        * int: Valid integer value
+    """
+    while True:
+        try:
+            variable = int(input(message))
+            return variable
+        except ValueError:
+            print(f"¡La variable {name} debe ser un numero entero!")
+
+
+def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
+    """Validates a option and generates the integer matrix.
+
+    Args:
+        * option (int): Option selected in the input
+        * rows (int): Number of rows in the matrix
+        * cols (int): Number of columns in the matrix
+
+    Returns:
+        * list[list[int]]: Matrix with integer numbers
+    """
+    while True:
+        match option:
+            case 1:
+                matrix = create_matrix(rows, cols)
+                break
+            case 2:
+                low = int(input("Ingrese el limite inferior: "))
+                high = int(input("Ingrese el limite superior: "))
+                matrix = np.random.randint(low, high, size=(rows, cols)).tolist()
+                break
+            case _:
+                option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
+
+    return matrix
+
+
+def print_results_matrix(
+    print_matrix: list[list[int | str] | list[str] | list[float] | list[int]],
+    results: list[int] | list[float],
+) -> None:
+    """...
+
+    Args:
+        * matrix (list[list[int]]): ...
+        * results (list[int  |  float]): ...
+    """
+    print_results_matrix = deepcopy(print_matrix)
+    print_results_matrix[0].append("VE")
+    for idx, row in enumerate(print_results_matrix[1:]):
+        row.append(results[idx])
+
+    print(tabulate(print_results_matrix, tablefmt="fancy_grid"))
+
+
 def main():
     """Main function"""
-    rows = int(input("Ingrese la cantidad de filas: "))
-    cols = int(input("Ingrese la cantidad de columnas: "))
-
-    option = int(input(WELCOME_INPUT))
-
-    match option:
-        case 1:
-            matrix = create_matrix(rows, cols)
-        case 2:
-            low = int(input("Ingrese el limite inferior: "))
-            high = int(input("Ingrese el limite superior: "))
-            matrix = np.random.randint(low, high, size=(rows, cols)).tolist()
-        case _:
-            matrix = []
-
-    headers, print_matrix = generate_print_matrix(matrix, cols)
-    print(tabulate(print_matrix, headers=headers, tablefmt="fancy_grid"))
-
-    print(laplace(matrix))
-    print(pessimistic(matrix))
-    print(optimistic(matrix))
-    print(savage(matrix))
+    rows = validate_integer_input("filas", "Digite la cantidad de filas: ")
+    cols = validate_integer_input("columnas", "Digite la cantidad de columnas: ")
 
     while True:
         try:
@@ -172,7 +217,17 @@ def main():
         except ValueError:
             print("¡El valor debe ser un número!")
 
-    print(hurwicz(matrix, coef))
+    option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
+    matrix = validate_option(option, rows, cols)
+    print(matrix)
+    print_matrix = generate_print_matrix(matrix, cols)
+    print(tabulate(print_matrix, tablefmt="fancy_grid"))
+
+    print_results_matrix(print_matrix, laplace(matrix))
+    print_results_matrix(print_matrix, pessimistic(matrix))
+    print_results_matrix(print_matrix, optimistic(matrix))
+    print_results_matrix(print_matrix, hurwicz(matrix, coef))
+    print_results_matrix(print_matrix, savage(matrix))
 
 
 if __name__ == "__main__":

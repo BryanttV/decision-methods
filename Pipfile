@@ -8,6 +8,9 @@ black = "*"
 numpy = "*"
 tabulate = "*"
 pylint = "*"
+mypy = "*"
+types-tabulate = "*"
+colorama = "*"
 
 [dev-packages]
 
