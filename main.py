@@ -18,11 +18,11 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
         * matrix (list[list[int]]): The created matrix
     """
     matrix = np.empty([rows, cols])
-    
+
     for i in range(rows):
         while True:
             try:
-                matrix[i,:] = [*input().split()]
+                matrix[i, :] = [*input().split()]
                 break
             except ValueError as v:
                 print(f"{v} is not a valid input.")
@@ -146,12 +146,12 @@ def validate_integer_input(name: str, message: str) -> int:
     """
     while True:
         try:
-            if (variable := int(input(message))) > 0: 
+            if (variable := int(input(message))) > 0:
                 return variable
             else:
-                print(f"¡La variable {name} debe ser mayor que cero!")
+                print(f"The {name} variable must be greater than zero!")
         except ValueError:
-            print(f"¡La variable {name} debe ser un numero entero!")
+            print(f"The {name} variable must be an integer!")
 
 
 def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
@@ -173,15 +173,17 @@ def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
             case 2:
                 while True:
                     try:
-                        low = input("Ingrese el limite inferior: ")
-                        high = input("Ingrese el limite superior: ")
-                        matrix = np.random.randint(low, high, size=(rows, cols)).tolist()
+                        low = input("Enter the lower limit: ")
+                        high = input("Enter the upper limit: ")
+                        matrix = np.random.randint(
+                            int(low), int(high), size=(rows, cols)
+                        ).tolist()
                         break
                     except ValueError:
-                        print("¡Los limites son valores enteros!")
+                        print("Limits must be integer values!")
                 break
             case _:
-                option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
+                option = validate_integer_input(name="option", message=WELCOME_INPUT)
 
     return matrix
 
@@ -197,7 +199,7 @@ def print_results_matrix(
         * results (list[int  |  float]): ...
     """
     print_results_matrix = deepcopy(print_matrix)
-    print_results_matrix[0].append("VE")
+    print_results_matrix[0].append("EV")
     for idx, row in enumerate(print_results_matrix[1:]):
         row.append(results[idx])
 
@@ -206,22 +208,21 @@ def print_results_matrix(
 
 def main():
     """Main function"""
-    rows = validate_integer_input("filas", "Digite la cantidad de filas: ")
-    cols = validate_integer_input("columnas", "Digite la cantidad de columnas: ")
+    rows = validate_integer_input("filas", "Enter the numbers of rows: ")
+    cols = validate_integer_input("columnas", "Enter the numbers of columns: ")
 
     while True:
         try:
-            coef = float(input("Digite el coeficiente de optimismo: "))
+            coef = float(input("Enter the optimism coefficient: "))
             if not 0 <= coef <= 1:
-                print("¡El numero debe estar entre 0 y 1!")
+                print("The number must be between 0 and 1!")
             else:
                 break
         except ValueError:
-            print("¡El valor debe ser un número!")
+            print("The value must be a number!")
 
-    option = validate_integer_input(name="opcion", message=WELCOME_INPUT)
+    option = validate_integer_input(name="option", message=WELCOME_INPUT)
     matrix = validate_option(option, rows, cols)
-    print(matrix)
     print_matrix = generate_print_matrix(matrix, cols)
     print(tabulate(print_matrix, tablefmt="fancy_grid"))
 
@@ -230,6 +231,7 @@ def main():
     print_results_matrix(print_matrix, optimistic(matrix))
     print_results_matrix(print_matrix, hurwicz(matrix, coef))
     print_results_matrix(print_matrix, savage(matrix))
+
 
 if __name__ == "__main__":
     main()
