@@ -192,11 +192,11 @@ def print_results_matrix(
     print_matrix: list[list[int | str] | list[str] | list[float] | list[int]],
     results: list[int] | list[float],
 ) -> None:
-    """...
+    """Print the results matrix of specific method
 
     Args:
-        * matrix (list[list[int]]): ...
-        * results (list[int  |  float]): ...
+        * print_matrix (list[list[int]]): The original print matrix
+        * results (list[int  |  float]): Results (expected values) of an decision method
     """
     print_results_matrix = deepcopy(print_matrix)
     print_results_matrix[0].append("EV")
@@ -208,8 +208,8 @@ def print_results_matrix(
 
 def main():
     """Main function"""
-    rows = validate_integer_input("filas", "Enter the numbers of rows: ")
-    cols = validate_integer_input("columnas", "Enter the numbers of columns: ")
+    rows = validate_integer_input("rows", "Enter the numbers of rows: ")
+    cols = validate_integer_input("columns", "Enter the numbers of columns: ")
 
     while True:
         try:
