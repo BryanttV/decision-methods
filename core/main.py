@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 from tabulate import tabulate
 
-from text import WELCOME_INPUT
+from core.text import WELCOME_INPUT
 
 
 def create_matrix(rows: int, cols: int) -> list[list[int]]:
