@@ -1,10 +1,13 @@
 """Operations Research Final Project"""
 from copy import deepcopy
 
+from colorama import Fore, init, Style
 import numpy as np
 from tabulate import tabulate
 
 from text import WELCOME_INPUT
+
+init(autoreset=True)
 
 
 def create_matrix(rows: int, cols: int) -> list[list[int]]:
@@ -18,14 +21,20 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
         * matrix (list[list[int]]): The created matrix
     """
     matrix = np.empty([rows, cols])
-
+    print(
+        Style.BRIGHT
+        + Fore.RED
+        + "The entry must have spaces between them for each row, "
+        "e.g.: 1 2 3 (if the row has 3 columns)"
+    )
     for i in range(rows):
         while True:
+            print(f"Please enter values of row {i+1}: ", end="")
             try:
                 matrix[i, :] = [*input().split()]
                 break
-            except ValueError as v:
-                print(f"{v} is not a valid input.")
+            except ValueError as value:
+                print(f"{value} is not a valid input.")
 
     return matrix.tolist()
 
@@ -140,6 +149,7 @@ def validate_integer_input(name: str, message: str) -> int:
 
     Args:
         * name (str): Name of variable to validate
+        * message (str): Error message
 
     Returns:
         * int: Valid integer value
@@ -189,49 +199,75 @@ def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
 
 
 def print_results_matrix(
+    method: str,
     print_matrix: list[list[int | str] | list[str] | list[float] | list[int]],
     results: list[int] | list[float],
+    min_result: bool = False
 ) -> None:
     """Print the results matrix of specific method
 
     Args:
+        * method (str): The method name
         * print_matrix (list[list[int]]): The original print matrix
         * results (list[int  |  float]): Results (expected values) of an decision method
+        * min_result (bool): A flag to choose the max or min expected value
     """
-    print_results_matrix = deepcopy(print_matrix)
-    print_results_matrix[0].append("EV")
-    for idx, row in enumerate(print_results_matrix[1:]):
+    print("\n", Style.BRIGHT + Fore.RED + f"{method} Method" + Style.RESET_ALL)
+
+    pr_matrix = deepcopy(print_matrix)
+    pr_matrix[0].append("EV")
+
+    for idx, row in enumerate(pr_matrix[1:]):
         row.append(results[idx])
 
-    print(tabulate(print_results_matrix, tablefmt="fancy_grid"))
+    results_function = min if min_result else max
+
+    print(tabulate(pr_matrix, tablefmt="fancy_grid"))
+    print(
+        "> The best expected value for the",
+        Style.BRIGHT + Fore.LIGHTGREEN_EX + f"{method} method",
+        Fore.WHITE + "is",
+        Style.BRIGHT + Fore.LIGHTMAGENTA_EX + f"{results_function(results)}",
+        "with",
+        Style.BRIGHT + Fore.LIGHTGREEN_EX + f"A{results.index(results_function(results))+1}",
+    )
 
 
 def main():
     """Main function"""
-    rows = validate_integer_input("rows", "Enter the numbers of rows: ")
-    cols = validate_integer_input("columns", "Enter the numbers of columns: ")
-
     while True:
-        try:
-            coef = float(input("Enter the optimism coefficient: "))
-            if not 0 <= coef <= 1:
-                print("The number must be between 0 and 1!")
-            else:
-                break
-        except ValueError:
-            print("The value must be a number!")
+        rows = validate_integer_input("rows", "Enter the numbers of rows: ")
+        cols = validate_integer_input("columns", "Enter the numbers of columns: ")
 
-    option = validate_integer_input(name="option", message=WELCOME_INPUT)
-    matrix = validate_option(option, rows, cols)
-    print_matrix = generate_print_matrix(matrix, cols)
-    print(tabulate(print_matrix, tablefmt="fancy_grid"))
+        while True:
+            try:
+                coef = float(input("Enter the optimism coefficient: "))
+                if not 0 <= coef <= 1:
+                    print("The number must be between 0 and 1!")
+                else:
+                    break
+            except ValueError:
+                print("The value must be a number!")
 
-    print_results_matrix(print_matrix, laplace(matrix))
-    print_results_matrix(print_matrix, pessimistic(matrix))
-    print_results_matrix(print_matrix, optimistic(matrix))
-    print_results_matrix(print_matrix, hurwicz(matrix, coef))
-    print_results_matrix(print_matrix, savage(matrix))
+        option = validate_integer_input(name="option", message=WELCOME_INPUT)
+        matrix = validate_option(option, rows, cols)
+        print_matrix = generate_print_matrix(matrix, cols)
+        print(Style.BRIGHT + Fore.RED + "\nOriginal Matrix" + Style.RESET_ALL)
+        print(tabulate(print_matrix, tablefmt="fancy_grid"))
 
+        print_results_matrix("Laplace", print_matrix, laplace(matrix))
+        print_results_matrix("Pessimistic", print_matrix, pessimistic(matrix))
+        print_results_matrix("Optimistic", print_matrix, optimistic(matrix))
+        print_results_matrix("Hurwicz", print_matrix, hurwicz(matrix, coef))
+        print_results_matrix("Savage", print_matrix, savage(matrix), min_result=True)
+
+        while (choose := input("\ncontinue [1] exit [2]: ")) not in "12":
+            print("The value is not correct, the correct options can only be 1 or 2.")
+
+        if choose == "2":
+            print("Bye!")
+            import time;time.sleep(3)
+            break
 
 if __name__ == "__main__":
     main()
