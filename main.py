@@ -202,6 +202,7 @@ def print_results_matrix(
     method: str,
     print_matrix: list[list[int | str] | list[str] | list[float] | list[int]],
     results: list[int] | list[float],
+    _min_result: bool = False
 ) -> None:
     """Print the results matrix of specific method
 
@@ -212,6 +213,7 @@ def print_results_matrix(
     print("\n", Style.BRIGHT + Fore.RED + f"{method} Method" + Style.RESET_ALL)
     print_results_matrix = deepcopy(print_matrix)
     print_results_matrix[0].append("EV")
+    results_function = min if _min_result else max
     for idx, row in enumerate(print_results_matrix[1:]):
         row.append(results[idx])
 
@@ -220,38 +222,45 @@ def print_results_matrix(
         f"> The best expected value for the",
         Fore.LIGHTGREEN_EX + f"{method} method",
         Fore.WHITE + "is",
-        Fore.LIGHTMAGENTA_EX + f"{max(results)}",
+        Fore.LIGHTMAGENTA_EX + f"{results_function(results)}",
         "with",
-        Fore.LIGHTGREEN_EX + f"A{results.index(max(results))+1}",
+        Fore.LIGHTGREEN_EX + f"A{results.index(results_function(results))+1}",
     )
 
 
 def main():
     """Main function"""
-    rows = validate_integer_input("rows", "Enter the numbers of rows: ")
-    cols = validate_integer_input("columns", "Enter the numbers of columns: ")
-
     while True:
-        try:
-            coef = float(input("Enter the optimism coefficient: "))
-            if not 0 <= coef <= 1:
-                print("The number must be between 0 and 1!")
-            else:
-                break
-        except ValueError:
-            print("The value must be a number!")
+        rows = validate_integer_input("rows", "Enter the numbers of rows: ")
+        cols = validate_integer_input("columns", "Enter the numbers of columns: ")
 
-    option = validate_integer_input(name="option", message=WELCOME_INPUT)
-    matrix = validate_option(option, rows, cols)
-    print_matrix = generate_print_matrix(matrix, cols)
-    print(Style.BRIGHT + Fore.RED + "\nOriginal Matrix" + Style.RESET_ALL)
-    print(tabulate(print_matrix, tablefmt="fancy_grid"))
+        while True:
+            try:
+                coef = float(input("Enter the optimism coefficient: "))
+                if not 0 <= coef <= 1:
+                    print("The number must be between 0 and 1!")
+                else:
+                    break
+            except ValueError:
+                print("The value must be a number!")
 
-    print_results_matrix("Laplace", print_matrix, laplace(matrix))
-    print_results_matrix("Pessimistic", print_matrix, pessimistic(matrix))
-    print_results_matrix("Optimistic", print_matrix, optimistic(matrix))
-    print_results_matrix("Hurwicz", print_matrix, hurwicz(matrix, coef))
-    print_results_matrix("Savage", print_matrix, savage(matrix))
+        option = validate_integer_input(name="option", message=WELCOME_INPUT)
+        matrix = validate_option(option, rows, cols)
+        print_matrix = generate_print_matrix(matrix, cols)
+        print(Style.BRIGHT + Fore.RED + "\nOriginal Matrix" + Style.RESET_ALL)
+        print(tabulate(print_matrix, tablefmt="fancy_grid"))
+
+        print_results_matrix("Laplace", print_matrix, laplace(matrix))
+        print_results_matrix("Pessimistic", print_matrix, pessimistic(matrix))
+        print_results_matrix("Optimistic", print_matrix, optimistic(matrix))
+        print_results_matrix("Hurwicz", print_matrix, hurwicz(matrix, coef))
+        print_results_matrix("Savage", print_matrix, savage(matrix), _min_result=True)
+
+        if int(input("continue [1] exit [2]: ")) == 2:
+            from time import sleep
+            print("Bye!")
+            sleep(3)
+            break
 
 
 if __name__ == "__main__":
