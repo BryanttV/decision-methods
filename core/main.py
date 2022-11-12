@@ -21,9 +21,16 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
         * matrix (list[list[int]]): The created matrix
     """
     matrix = np.empty([rows, cols])
-
+    print(
+        Style.BRIGHT
+        + Fore.RED
+        + "The entry must have spaces between them for each row, "
+        "e.g.: 1 2 3 (if the row has 3 columns)"
+        + Style.RESET_ALL
+    )
     for i in range(rows):
         while True:
+            print(f"Please enter values of row {i+1}: ", end="")
             try:
                 matrix[i, :] = [*input().split()]
                 break
