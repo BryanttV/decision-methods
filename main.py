@@ -26,7 +26,6 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
         + Fore.RED
         + "The entry must have spaces between them for each row, "
         "e.g.: 1 2 3 (if the row has 3 columns)"
-        + Style.RESET_ALL
     )
     for i in range(rows):
         while True:
@@ -34,8 +33,8 @@ def create_matrix(rows: int, cols: int) -> list[list[int]]:
             try:
                 matrix[i, :] = [*input().split()]
                 break
-            except ValueError as v:
-                print(f"{v} is not a valid input.")
+            except ValueError as value:
+                print(f"{value} is not a valid input.")
 
     return matrix.tolist()
 
@@ -150,6 +149,7 @@ def validate_integer_input(name: str, message: str) -> int:
 
     Args:
         * name (str): Name of variable to validate
+        * message (str): Error message
 
     Returns:
         * int: Valid integer value
@@ -202,29 +202,34 @@ def print_results_matrix(
     method: str,
     print_matrix: list[list[int | str] | list[str] | list[float] | list[int]],
     results: list[int] | list[float],
-    _min_result: bool = False
+    min_result: bool = False
 ) -> None:
     """Print the results matrix of specific method
 
     Args:
+        * method (str): The method name
         * print_matrix (list[list[int]]): The original print matrix
         * results (list[int  |  float]): Results (expected values) of an decision method
+        * min_result (bool): A flag to choose the max or min expected value
     """
     print("\n", Style.BRIGHT + Fore.RED + f"{method} Method" + Style.RESET_ALL)
-    print_results_matrix = deepcopy(print_matrix)
-    print_results_matrix[0].append("EV")
-    results_function = min if _min_result else max
-    for idx, row in enumerate(print_results_matrix[1:]):
+
+    pr_matrix = deepcopy(print_matrix)
+    pr_matrix[0].append("EV")
+
+    for idx, row in enumerate(pr_matrix[1:]):
         row.append(results[idx])
 
-    print(tabulate(print_results_matrix, tablefmt="fancy_grid"))
+    results_function = min if min_result else max
+
+    print(tabulate(pr_matrix, tablefmt="fancy_grid"))
     print(
-        f"> The best expected value for the",
-        Fore.LIGHTGREEN_EX + f"{method} method",
+        "> The best expected value for the",
+        Style.BRIGHT + Fore.LIGHTGREEN_EX + f"{method} method",
         Fore.WHITE + "is",
-        Fore.LIGHTMAGENTA_EX + f"{results_function(results)}",
+        Style.BRIGHT + Fore.LIGHTMAGENTA_EX + f"{results_function(results)}",
         "with",
-        Fore.LIGHTGREEN_EX + f"A{results.index(results_function(results))+1}",
+        Style.BRIGHT + Fore.LIGHTGREEN_EX + f"A{results.index(results_function(results))+1}",
     )
 
 
@@ -254,17 +259,15 @@ def main():
         print_results_matrix("Pessimistic", print_matrix, pessimistic(matrix))
         print_results_matrix("Optimistic", print_matrix, optimistic(matrix))
         print_results_matrix("Hurwicz", print_matrix, hurwicz(matrix, coef))
-        print_results_matrix("Savage", print_matrix, savage(matrix), _min_result=True)
-        
-        while (choose := int(input("\ncontinue [1] exit [2]: "))) not in [1, 2]:
+        print_results_matrix("Savage", print_matrix, savage(matrix), min_result=True)
+
+        while (choose := input("\ncontinue [1] exit [2]: ")) not in "12":
             print("The value is not correct, the correct options can only be 1 or 2.")
 
-        if choose == 2:
-            from time import sleep
+        if choose == "2":
             print("Bye!")
-            sleep(3)
+            import time;time.sleep(3)
             break
-
 
 if __name__ == "__main__":
     main()
