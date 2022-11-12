@@ -255,8 +255,11 @@ def main():
         print_results_matrix("Optimistic", print_matrix, optimistic(matrix))
         print_results_matrix("Hurwicz", print_matrix, hurwicz(matrix, coef))
         print_results_matrix("Savage", print_matrix, savage(matrix), _min_result=True)
+        
+        while (choose := int(input("\ncontinue [1] exit [2]: "))) not in [1, 2]:
+            print("The value is not correct, the correct options can only be 1 or 2.")
 
-        if int(input("continue [1] exit [2]: ")) == 2:
+        if choose == 2:
             from time import sleep
             print("Bye!")
             sleep(3)

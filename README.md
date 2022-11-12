@@ -1,5 +1,5 @@
 # decision-methods 🤓
-Basic program with some decision methos like Laplace, Savage, Hurwicz, Optimistic and Pessimistic
+Basic program with some decision methods like Laplace, Savage, Hurwicz, Optimistic and Pessimistic
 
 ---
 
