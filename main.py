@@ -216,7 +216,7 @@ def validate_limits_of_matrix() -> Tuple[int, int]:
                 )
 
             return low, high
-            
+
         except ValueError:
             print(error("\nLimits must be integer values!\n"))
         except Exception as excp:
@@ -260,7 +260,7 @@ def generate_print_matrix(matrix: list[list[int]]) -> list[list[int | str] | lis
     Returns:
         * Tuple[list[str], list[list[int | str]]]: Print matrix
     """
-    headers = [f"S{i}" for i in range(1, len(matrix) + 1)]
+    headers = [f"S{i}" for i in range(1, len(matrix[0]) + 1)]
     headers.insert(0, "X")
 
     print_matrix: list[list[int | str] | list[str]] = deepcopy(matrix)  # type: ignore
