@@ -4,6 +4,7 @@ from copy import deepcopy
 from colorama import Fore, init, Style
 import numpy as np
 from tabulate import tabulate
+from typing import Iterable
 
 from text import WELCOME_INPUT
 
@@ -144,7 +145,12 @@ def pessimistic(matrix: list[list[int]]) -> list[int]:
     return [min(row) for row in matrix]
 
 
-def validate_integer_input(name: str, message: str) -> int:
+def validate_integer_input(
+        name: str,
+        message: str,
+        min_limit: int = 0,
+        max_limit: int = 50
+    ) -> int:
     """Validates the value of a integer variable.
 
     Args:
@@ -156,12 +162,41 @@ def validate_integer_input(name: str, message: str) -> int:
     """
     while True:
         try:
-            if (variable := int(input(message))) > 0:
+            if min_limit < (variable := int(input(message))) <= max_limit:
                 return variable
             else:
-                print(f"The {name} variable must be greater than zero!")
+                if name != "option":
+                    print(f"The {name} variable must be greater "
+                        f"than {min_limit} and less {max_limit}!")
+                print("The value is not correct, the correct options can only be 1 or 2.")
         except ValueError:
             print(f"The {name} variable must be an integer!")
+
+
+def validate_limit_number(*numbers: tuple[int]) -> list[int]:
+    """Validates limit numbers of rows and colums.
+
+    Args:
+        * numbers (tuple[int]): Numbers to validate.
+
+    Returns:
+        * list[int]: Lower and upper numbers.
+        
+    Raise:
+        * str: If some validation ocurred.
+    """
+    
+    numbers = [*map(int, numbers)]
+    
+    if len(set(numbers)) == 1:
+        raise Exception(Style.BRIGHT + Fore.RED + "\nThe low and high limits can't be the same")
+
+    for num in numbers:
+        if not -9999999999 <= num <= 9999999999:
+            raise Exception("The limit variables must be greater "
+                            "than -9999999999 and less 9999999999!")
+
+    return numbers
 
 
 def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
@@ -182,15 +217,28 @@ def validate_option(option: int, rows: int, cols: int) -> list[list[int]]:
                 break
             case 2:
                 while True:
+                    print(
+                        Style.BRIGHT
+                        + Fore.GREEN
+                        + "\nThe number of low and high limits must be between "
+                        "-9999999999 and 9999999999.\n"
+                    )
                     try:
-                        low = input("Enter the lower limit: ")
-                        high = input("Enter the upper limit: ")
+                        low, high = validate_limit_number(
+                            input("Enter the lower limit: "), input("Enter the upper limit: ")
+                        )
+                        
+                        if high < low:
+                            raise Exception("The upper limit must be greater than lower limit!")
+
                         matrix = np.random.randint(
-                            int(low), int(high), size=(rows, cols)
+                            low, high, size=(rows, cols)
                         ).tolist()
                         break
                     except ValueError:
                         print("Limits must be integer values!")
+                    except Exception as e:
+                        print(e)
                 break
             case _:
                 option = validate_integer_input(name="option", message=WELCOME_INPUT)
@@ -236,10 +284,16 @@ def print_results_matrix(
 def main():
     """Main function"""
     while True:
+        print(
+            Style.BRIGHT
+            + Fore.GREEN
+            + "\nThe number of rows and columns must be between 0 and 50.\n"
+        )
         rows = validate_integer_input("rows", "Enter the numbers of rows: ")
         cols = validate_integer_input("columns", "Enter the numbers of columns: ")
 
         while True:
+            print(Style.BRIGHT + Fore.RED + "\nThe decimal number is with '.' e.g.: 3.14\n")
             try:
                 coef = float(input("Enter the optimism coefficient: "))
                 if not 0 <= coef <= 1:
@@ -249,7 +303,12 @@ def main():
             except ValueError:
                 print("The value must be a number!")
 
-        option = validate_integer_input(name="option", message=WELCOME_INPUT)
+        option = validate_integer_input(
+            name="option",
+            message=WELCOME_INPUT,
+            min_limit=1,
+            max_limit=2
+        )
         matrix = validate_option(option, rows, cols)
         print_matrix = generate_print_matrix(matrix, cols)
         print(Style.BRIGHT + Fore.RED + "\nOriginal Matrix" + Style.RESET_ALL)
@@ -261,7 +320,7 @@ def main():
         print_results_matrix("Hurwicz", print_matrix, hurwicz(matrix, coef))
         print_results_matrix("Savage", print_matrix, savage(matrix), min_result=True)
 
-        while (choose := input("\ncontinue [1] exit [2]: ")) not in "12":
+        while (choose := input("\ncontinue [1] exit [2]: ")) not in "12" or choose == "":
             print("The value is not correct, the correct options can only be 1 or 2.")
 
         if choose == "2":
